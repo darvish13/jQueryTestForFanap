@@ -1,17 +1,18 @@
 $(document).ready(function () {
 
+    var offset = 0
+
     $.ajax({
         url: 'https://service-play.pod.land/srv/game/get',
         data: {
             size: 15,
-            offset: 0
+            offset: offset
         }
     }).done(function (response) {
-        var gameCards = []
+        let gameCards = []
 
-        response.Result.forEach(game => {
-            
-            var gameCardHtml =
+        response.Result.forEach(function (game) {
+            let gameCardHtml =
                 '<div class="col-sm-2 m-2">\
                             <article class="card card-size-limit text-right bg-dark text-white game-card" \
                             data-name='+ game.Name + '\
@@ -44,14 +45,14 @@ $(document).ready(function () {
             var banner = $(this).data('banner')
             var preview = $(this).data('preview')
             var category = $(this).data('category')
-            var description = $(this).data('description').slice(0,200)
+            var description = $(this).data('description').slice(0, 200)
             var log = $(this).data('log')
-            
+
 
             var modalHtml = '<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="game-modal" aria-hidden="true" id="game-modal">\
                                 <div class="modal-dialog modal-xl">\
                                     <div class="modal-content bg-dark">\
-                                        <img src="'+ banner +'" style="width: 100%" class="rounded">\
+                                        <img src="'+ banner + '" style="width: 100%" class="rounded">\
                                         <article class="card">\
                                             <div class="card-body bg-dark">\
                                                 <div class="row">\
@@ -60,10 +61,10 @@ $(document).ready(function () {
                                                     </div>\
                                                     <div class="col-sm text-right text-white p-4" style="background: #4a0c95">\
                                                         <h6>'+ name + '</h6>\
-                                                        <div class="category-color d-inline-block text-dark p-1 rounded">'+ category +'</div>\
-                                                        <p class-" mt-3">'+ description +'</p>\
+                                                        <div class="category-color d-inline-block text-dark p-1 rounded">'+ category + '</div>\
+                                                        <p class-" mt-3">'+ description + '</p>\
                                                         <span >تغییرات:</span>\
-                                                        <p>'+ log +'</p>\
+                                                        <p>'+ log + '</p>\
                                                     </div>\
                                                     <div class="col-sm-2 text-right text-white p-4" style="background: #9545dc">\
                                                         <button class="btn form-control shadow text-white" style="background: #239f00">بازی</Button>\
@@ -84,7 +85,54 @@ $(document).ready(function () {
             })
         })
 
-        
+
+        /**
+            Pagination with Scroll
+        */
+        $(window).scroll(function () {
+            if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                offset = offset + 15
+                $.ajax({
+                    url: 'https://service-play.pod.land/srv/game/get',
+                    data: {
+                        size: 15,
+                        offset: offset
+                    }
+                })
+                    .done(function (response) {
+                        let newGameCards = []
+
+                        response.Result.forEach(function (newGame) {
+
+                            let gameCardHtml =
+                                '<div class="col-sm-2 m-2">\
+                                <article class="card card-size-limit text-right bg-dark text-white game-card" \
+                                data-name='+ newGame.Name + '\
+                                data-banner="'+ newGame.Banner + '"\
+                                data-preview="'+ newGame.preview + '"\
+                                data-category="'+ newGame.Lobby.Name + '"\
+                                data-description="'+ newGame.description + '"\
+                                data-log="'+ newGame.Changelog + '"\
+                                >\
+                                <div class="card-header"></div>\
+                                    <img src="'+ newGame.preview + '"\
+                                        alt="" class="card-img-top">\
+                                    <div class="card-body">\
+                                        <div class="card-title category-color d-inline-block text-dark p-1 rounded">'+ newGame.Lobby.Name + '</div>\
+                                        <div class="card-subtitle">'+ newGame.Name + '</div>\
+                                        <p class="card-text">play.pod</p>\
+                                    </div>\
+                                </article>\
+                            </div>'
+
+                            newGameCards.push(gameCardHtml)
+                        })
+
+                        $('#games-row').append(newGameCards)
+                    })
+            }
+        })
+
 
         /** Live Search */
         $('.live-search-box').on('keyup', function () {
